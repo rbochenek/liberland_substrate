@@ -459,6 +459,7 @@ pub fn testnet_genesis(
 			admin: offices_admin,
 			clerks: nfts_clerks,
 		},
+		senate_membership: Default::default(),
 		substrate_bridge_outbound_channel: Default::default(),
 		sora_bridge_app: Default::default(),
 	}

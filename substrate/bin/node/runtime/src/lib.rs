@@ -155,7 +155,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 26,
+	spec_version: 27,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -172,7 +172,7 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 	// and set impl_version to 0. If only runtime
 	// implementation changes and behavior does not, then leave spec_version as
 	// is and increment impl_version.
-	spec_version: 26,
+	spec_version: 27,
 	impl_version: 0,
 	apis: RUNTIME_API_VERSIONS,
 	transaction_version: 1,
@@ -1011,6 +1011,19 @@ impl pallet_membership::Config<pallet_membership::Instance1> for Runtime {
 	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_membership::Config<pallet_membership::Instance2> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type AddOrigin = EnsureRootOrHalfSenate;
+	type RemoveOrigin = EnsureRootOrHalfSenate;
+	type SwapOrigin = EnsureRootOrHalfSenate;
+	type ResetOrigin = EnsureRootOrHalfSenate;
+	type PrimeOrigin = EnsureRootOrHalfSenate;
+	type MembershipInitialized = Senate;
+	type MembershipChanged = Senate;
+	type MaxMembers = SenateMaxMembers;
+	type WeightInfo = pallet_membership::weights::SubstrateWeight<Runtime>;
+}
+
 parameter_types! {
 	pub const ProposalBond: Permill = Permill::from_percent(5);
 	pub const ProposalBondMinimum: Balance = 1 * DOLLARS;
@@ -1794,6 +1807,7 @@ construct_runtime!(
 		AssetConversionTxPayment: pallet_asset_conversion_tx_payment = 64,
 		ContractsRegistry: pallet_contracts_registry = 65,
 		SenateAccount: pallet_custom_account::<Instance2> = 66,
+		SenateMembership: pallet_membership::<Instance2> = 67,
 
 		// Sora Bridge:
 		LeafProvider: leaf_provider = 80,
@@ -1853,7 +1867,8 @@ pub type Executive = frame_executive::Executive<
 // All migrations executed on runtime upgrade as a nested tuple of types implementing
 // `OnRuntimeUpgrade`.
 type Migrations = (
-	crate::migrations::add_senate_account_pallet::Migration<Runtime>,
+	crate::migrations::add_senate_membership_pallet::Migration<Runtime>,
+	crate::migrations::copy_senate_members_from_collective_to_membership::Migration<Runtime>,
 );
 
 type EventRecord = frame_system::EventRecord<
